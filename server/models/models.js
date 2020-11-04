@@ -1,7 +1,15 @@
 const { Pool } = require('pg');
 
-const PG_URI =
-'postgres://nlnabeqa:pH3fPZ-Q_kaOm5h59XAjUBfkSPa6IkiP@lallah.db.elephantsql.com:5432/nlnabeqa';
+let PG_URI = '';
+
+if (process.env.NODE_ENV === 'test') {
+  // Use a test database when running npm test
+  PG_URI = 'postgres://mltnekax:BZRMKAEF6HksAkNacSm5u7N2w-DWiH6u@lallah.db.elephantsql.com:5432/mltnekax';
+} else {
+  // Use the development database when not running in test mode
+  PG_URI =
+    'postgres://nlnabeqa:pH3fPZ-Q_kaOm5h59XAjUBfkSPa6IkiP@lallah.db.elephantsql.com:5432/nlnabeqa';
+}
 
 // create a new pool here using the connection string above
 const pool = new Pool({

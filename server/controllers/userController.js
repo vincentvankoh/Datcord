@@ -24,6 +24,8 @@ userController.hashPassword = (req, res, next) => {
 userController.createUser = (req, res, next) => {
   const { hash } = res.locals;
   const { username } = req.body;
+  console.log(username);
+  console.log(hash);
   // Attempt to create the new user in the database
   db.query('INSERT INTO users(user_name, hashed_pass) VALUES ($1, $2) RETURNING id;', [username, hash])
     .then((data) => {
