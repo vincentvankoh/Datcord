@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.jsx",
+  "plugins": [
+    "react-hooks"
+  ],
   "scripts": {
     "start": "nodemon server/server.js",
     "build": "cross-env NODE_ENV=production webpack -w",
