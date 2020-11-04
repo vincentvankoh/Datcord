@@ -1,97 +1,74 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const url = 'ws://localhost:4040';
+function Main () {
+  // [state name, state action]
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [ws, setWebSocket] = useState("");
 
-class Main extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            message: '',
-            messages: [],
-        };
-        this.handleChange = this.handleChange.bind(this);
+  // set websocket location
+  const url = 'ws://localhost:4040';
+  // connect to a new Websocket
+  const connection = new WebSocket(url);
+
+  const nestedDisplay = [];
+
+  useEffect( () => {
+    connection.onopen = (e) => {
+        console.log('WebSocket is open now.');
+      }
+    connection.onclose = (e) => {
+    console.log('WebSocket is closed now.');
+    // You can pass the special value of empty array [] as a way of saying “only run on mount, and clean up on unmount”
+    setWebSocket(new WebSocket(url));
     }
-
-    // connect to a new Websocket
-    connection = new WebSocket(url);
-
-    // when component mounts
-    componentDidMount() {
-        this.connection.onopen = (event) => {
-            console.log('WebSocket is open now.');
-        };
-
-        this.connection.onclose = (event) => {
-            console.log('WebSocket is closed now.');
-            this.setState(prev => {
-                return {
-                    ...prev,
-                    ws: new WebSocket(url),
-                }
-            })
-        };
-
-        this.connection.onerror = (event) => {
-            console.log('WebSocket has had an error: ', event);
-        };
-
-        this.connection.onmessage = (event) => {
-        // when message is received from server
-        // append to dom
-            this.setState((prevState) => {
-                return {
-                    ...prevState, 
-                    messages: [...prevState.messages, event.data],
-                }
-            });
-        }
+    connection.onerror = (e) => {
+        console.log('WebSocket has had an error: ', e)
     }
-
-
-    // on change of input box, save message to state
-    handleChange(event) {
-        this.setState(prevState => {
-            return {
-                ...prevState,
-                message: event.target.value,
-            }
-        })
-    }
-
-    render() {
-        return (
-            <div>
-                <div className='chatroom'>
-                    { this.state.messages.map(message => (
-                    <>
-                        <p>{message}</p>
-                        <hr />
-                    </>
-                    ))}
-                </div>
+    connection.onmessage = (e) => {
+    // when message is received from server append to dom
+        nestedDisplay.push(
+            <div key={e.data}>
+                <p>{e.data}</p>
                 <hr />
-                <form>
-                    <input 
-                        type='text'
-                        className='message'
-                        placeholder='message'
-                        onChange={this.handleChange}
-                        />
-                    <button
-                        type='button'
-                        onClick={(e) => {
-                            e.preventDefault();
-                            this.connection.send(this.state.message);
-                            const textbox = document.querySelector('.message');
-                            textbox.value = '';
-                        }}
-                        >
-                        Send
-                    </button>
-                </form>
             </div>
         )
+        console.log("nested display updated", nestedDisplay)
+        setMessages(nestedDisplay);
     }
+  }, []);
+
+    // console.log(messages);
+    // console.log(message);
+  
+    return (
+        <div>
+            <div className='chatroom'>
+                { messages }
+            </div>
+        <hr />
+            <form>
+                <input 
+                    type='text'
+                    className='message'
+                    placeholder='message'
+                    onChange={ (e) => setMessage(e.target.value)}
+                    />
+                <button
+                    type='button'
+                    onClick={ (e) => {
+                        e.preventDefault();
+                        connection.send(message);
+                        const textbox = document.querySelector('.message');
+                        textbox.value = '';
+                        setMessages(nestedDisplay);
+                    }}
+                    >
+                    Send
+                </button>
+            </form>
+        </div>
+    )
 }
 
 export default Main;
