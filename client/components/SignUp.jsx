@@ -63,7 +63,7 @@ class SignUp extends React.Component {
     }
     render() {
         return (
-            <>
+        <>
             <h3>Sign Up</h3>
             <form style={{display: 'flex', flexDirection: 'column'}}>
                 <input 
