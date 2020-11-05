@@ -1,5 +1,5 @@
 {
-  "name": "live-chat",
+  "name": "datcord",
   "version": "1.0.0",
   "description": "",
   "main": "index.jsx",
@@ -8,20 +8,28 @@
   ],
   "scripts": {
     "start": "nodemon server/server.js",
+    "testserver": "cross-env NODE_ENV=test nodemon server/server.js",
     "build": "cross-env NODE_ENV=production webpack -w",
-    "dev": "concurrently \"cross-env NODE_ENV=development webpack-dev-server --open\" \"nodemon server/server.js\""
+    "dev": "concurrently \"cross-env NODE_ENV=development webpack-dev-server --open\" \"nodemon server/server.js\"",
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/StarNosed-Mole/LiveChat.git"
+    "url": "git+https://github.com/PantlessThundergeese/Datcord.git"
   },
   "keywords": [],
-  "author": "Erick, Janis, Amir, Corey",
+  "author": "Carlos, Andy, Isaac, Corey",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/StarNosed-Mole/LiveChat/issues"
+    "url": "https://github.com/PantlessThundergeese/Datcord/issues"
   },
-  "homepage": "https://github.com/StarNosed-Mole/LiveChat#readme",
+  "homepage": "https://github.com/PantlessThundergeese/Datcord/#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
   "dependencies": {
     "babel": "^6.23.0",
     "bcrypt": "^5.0.0",
@@ -54,6 +62,9 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "file-system": "^2.2.2",
+    "jest": "^26.6.2",
+    "supertest": "^6.0.0",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.11.0"

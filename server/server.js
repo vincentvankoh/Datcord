@@ -30,7 +30,7 @@ app.get('/api/isloggedin', sessionController.isLoggedIn, (req, res) => {
   res.status(200).send({ isLoggedIn, username });
 });
 
-// ! TO DO - check response format!!!!!
+// Attempt to sign up a new user
 app.post('/api/signup', userController.hashPassword, userController.createUser, sessionController.createSession, (req, res) => {
   const { username, isLoggedIn } = res.locals;
   res.status(200).send({ isLoggedIn, username });
