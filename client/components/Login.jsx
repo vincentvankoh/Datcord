@@ -1,85 +1,79 @@
-import React, { useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { Link, useHistory, BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import Main from './Main.jsx';
+import Signup from './Signup.jsx';
 
-class Login extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      username: '',
-      password: '',
-      errorMessage: '',
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-  }
+function Login() {
+  const [username, setUserName] = useState(""); 
+  const [password, setPassword] = useState(""); 
+  const [errorMessage, setErrorMessage] = useState("this shit is broken"); 
+  const [loginStatus, setLoginStatus] = useState(""); 
 
-  handleChange(event, key) {
-    // on change of input box,
-    // change the state of the passed in key
-    // and return the new state with the
-    // event.target.value (input box text)
-    this.setState((prevState) => ({
-      ...prevState,
-      [key]: event.target.value,
-    }));
-  }
-
-  handleClick() {
-    const { username, password } = this.state;
-    const { push } = useHistory();
-    // fetch user info by sending username and password
+  function handleClick () {
+    // fetch starts
     fetch('/api/login', {
-      method: 'GET',
-      'Content-Type': 'multipart/form-data',
-      data: {
-        username, 
-        password,
-      },
-    }).then((data) => {
-      const { isLoggedIn } = data;
-      // if user is logged in
-      // redirect to main page
-      if (isLoggedIn) return push('/main');
-      // else
-      // set error message to 'Wrong username or password!'
-      this.setState((prevState) => {
-        return {
-          ...prevState,
-          errorMessage: 'Wrong username or password!',
+      method: 'POST',
+      'Content-Type': 'application/json',
+      data: JSON.stringify( 
+        {
+            username: username,
+            password: password,
         }
-      });
-      // redirect to login page
-      return push('/login');
+      ),
+    }).then((resp) => resp.json())
+    .then((data) => {
+      const { isLoggedIn } = data;
+      // if isLogged in is true, redirect to main page
+      if (isLoggedIn) {
+        setLoginStatus(true)
+        console.log(loginStatus)
+      } else {
+        setLoginStatus(false)
+        console.log(loginStatus)
+      }
     }).catch((err) => console.log(err));
   }
 
-  render() {
-    return (
-      <>
-        <p>{this.state.errorMessage}</p>
-        <h3>Login</h3>
-        <form style={{display: 'flex', flexDirection: 'column'}}>
-          <input
-            type="text"
-            placeholder="username"
-            onChange={(event) => this.handleChange(event, 'username')}
-            />
-          <input
-            type="password"
-            placeholder="password"
-            onChange={(event) => this.handleChange(event, 'password')}
-          />
-          <button
-            type="button"
-            onClick={this.handleClick}
-          >
-            Log In
-          </button>
-        </form>
-        <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
-      </>
-    );
-  }
-}
+  useEffect( () => {
+
+  })
+
+  return (
+    <div>
+      <Router>
+      <Switch>
+        <Route exact path='/login' >
+          { loginStatus ? <Redirect to="/"/> : 
+          <div>
+            <h3>Login</h3>
+            <form style={{display: 'flex', flexDirection: 'column'}}>
+              <input
+                type="text"
+                placeholder="username"
+                onChange={(e) => setUserName(e.target.value)}
+                />
+              <input
+                type="password"
+                placeholder="password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleClick}
+              >
+                Log In
+              </button>
+            </form>
+            <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
+          </div>
+          }
+        </Route>
+        <Route exact path='/' component={Main} />
+        <Route exact path='/signup' component={Signup} />
+      </Switch>
+      </Router>
+    </div>
+  ); // end of return 
+} // end of login function
 
 export default Login;

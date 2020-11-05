@@ -1,95 +1,91 @@
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import Main from './Main.jsx';
 
-class SignUp extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            username: '',
-            password: '',
-            confirmPassword: '',
-            errorMessage: '',
-        };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-    }
+function Signup () {
+  const [username, setUserName] = useState(""); 
+  const [password, setPassword] = useState(""); 
+  const [errorMessage, setErrorMessage] = useState(""); 
+  const [loginStatus, setLoginStatus] = useState(""); 
 
-    handleChange(event, key) {
-        // on input box change, save username and password into state
-        this.setState((prevState) => ({
-            ...prevState,
-            [key]: event.target.value,
-        }));
-    }
+  useEffect( () => {
 
-    handleClick() {
-        const { push } = useHistory();
-        const { password, username } =  this.state;
-        // check if password is the same as confirmPassword
-        if (this.state.password !== this.state.confirmPassword) {
-            const errorMessage = 'Please enter the same password in the "Confirm Password" field';
-        // if not, display error message
-            this.setState((prevState) => ({
-                ...prevState,
-                errorMessage,
-            }));
+  })
+
+  function submitSignup() {
+      console.log("username", username);
+      console.log("password", password);
+    fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+        },
+        body: JSON.stringify( 
+        {
+            username: username,
+            password: password,
+        }
+        ),
+    })
+    .then((resp) => resp.json())
+    //if all ok from server response, redirect to main page of app
+    .then(data => {
+        const { isLoggedIn } = data;
+        // if isLogged in is true, redirect to main page
+        console.log("fetch data", data);
+        console.log(isLoggedIn);
+        if (isLoggedIn) {
+          setLoginStatus(true)
         } else {
-            this.setState((prevState) => ({
-                ...prevState,
-                errorMessage: '',
-            }));
-        }  
-       // send username and password to server and wait for response from server
-        fetch('/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            body: {
-                username,
-                password,
-            },
-        })
-        //if all ok from server response, redirect to main page of app
-        .then(data => {
-            const { isLoggedIn } = data;
-            // if isLogged in is true, redirect to main page
-            if (isLoggedIn) return push('/main');
-            // else, redirect to login
-            return push('/login');
-        })
-        .catch(err => console.log(err));
-
+          setLoginStatus(false)
+        }
+    })
+    .catch(err => console.log(err));
     }
-    render() {
-        return (
-        <>
-            <h3>Sign Up</h3>
-            <form style={{display: 'flex', flexDirection: 'column'}}>
-                <input 
-                    type="text"
-                    placeholder="username"
-                    onChange={(event) => this.handleChange(event, 'username')}
-                    required
-                    />
-                <input 
-                    type="password"
-                    placeholder="password"
-                    onChange={(event) => this.handleChange(event, 'password')}
-                    required
-                    />
-                <input 
-                    type="password"
-                    placeholder="confirm password"
-                    onChange={(event) => this.handleChange(event, 'confirmPassword')}
-                    required
-                    />
-                <button type="button" onSubmit={this.handleClick} onClick={this.handleClick}>Sign Up</button>
-                <h2>{this.state.errorMessage}</h2>
-            </form>
-        </>
-        )
-    }
-}
 
-export default SignUp;
+  return (
+    <div>
+    <Router>
+    <Switch>
+      <Route exact path='/signup' >
+        { loginStatus ? <Redirect to="/" component={Main} /> : 
+        <div>
+        <h3>Sign Up</h3>
+        <form style={{display: 'flex', flexDirection: 'column'}}>
+            <input 
+                type="text"
+                placeholder="username"
+                onChange={(e) =>  {
+                    setUserName(e.target.value)
+                    console.log(username);
+                }
+                }
+                required
+                />
+            <input 
+                type="password"
+                placeholder="password"
+                onChange={(e) => {
+                    setPassword(e.target.value)
+                    console.log(password)
+                }
+                }
+                required
+                />
+            <button type="button" onClick={submitSignup} onSubmit={submitSignup}>Sign Up</button>
+            <h2>{errorMessage}</h2>
+        </form>
+        </div>
+        
+        }
+      </Route>
+      <Route exact path='/' component={Main}>
+      </Route>
+    </Switch>
+    </Router>
+
+    </div>
+    ) // end of return
+} // end of function
+
+export default Signup;
