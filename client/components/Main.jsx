@@ -43,7 +43,7 @@ function Main () {
   
     return (
         <div>
-            <div className='chatroom'>
+             <div className='chatroom'>
                 { messages }
             </div>
         <hr />
