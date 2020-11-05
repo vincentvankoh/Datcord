@@ -29,14 +29,14 @@ function Main () {
     // when message is received from server append to dom
         nestedDisplay.push(
             <div key={e.data}>
-                <p>{e.data}</p>
+                <p key={e.data}>{e.data}</p>
                 <hr />
             </div>
         )
-        console.log("nested display updated", nestedDisplay)
-        setMessages(nestedDisplay);
+        // console.log("nested display updated", nestedDisplay)
+        setMessages(messages.concat(nestedDisplay));
     }
-  }, []);
+  });
 
     // console.log(messages);
     // console.log(message);

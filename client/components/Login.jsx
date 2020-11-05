@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link, useHistory, BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import Main from './Main.jsx';
-import Signup from './Signup.jsx';
+import Signup from './SignUp.jsx';
 
 function Login() {
   const [username, setUserName] = useState("");
@@ -48,6 +48,8 @@ function Login() {
             {loginStatus ? <Redirect to="/" /> :
               <div>
                 <h3>Login</h3>
+                {console.log(loginStatus)}
+                <p>{loginStatus}</p>
                 <form style={{ display: 'flex', flexDirection: 'column' }}>
                   <input
                     type="text"
