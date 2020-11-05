@@ -3,12 +3,13 @@ const fs = require('file-system');
 const path = require('path');
 const server = 'http://localhost:3000';
 const cookieParser = require('cookie-parser');
+const db = require('../server/models/models.js');
 
 describe('Server Route Integration', () => {
 
   // Testing get request to homepage
   describe('/', () => {
-    describe('GET - SUCCESS', () => {
+    describe('GET - SUCCESS ', () => {
       it('responds with status 200', () => {
         return request(server)
           .get('/')
@@ -29,25 +30,129 @@ describe('Server Route Integration', () => {
       });
     });
   });
-
+  //Testing signup functionality 
   describe('/api/signup', () => {
-    describe('POST', () => {
-      // SUCCESS:
-      // 200 status
-      const newUser2 = { username: 'newUser2', password: 'password2' }
-      describe('GET - SUCCESS', () => {
-        it('responds with status 200', () => {
-          return request(server)
-            .post('/api/signup')
-            .send(newUser2)
-            .expect(200);
-        });
+    beforeAll((done) => {
+      // Delete the contents of the test database before running any tests
+      db.query('TRUNCATE users CASCADE')
+        .then(() => {
+          done();
+        })
+    });
+
+    describe('POST - SUCCESS (username that does not exist in the "users" table of the test database)', () => {
+      const newUser = { username: 'newUser', password: 'password' }
+      // Delete the contents of the test database before running each test case
+      beforeEach((done) => {
+        db.query('TRUNCATE users CASCADE')
+          .then(() => {
+            done();
+          })
+      });
+      it('responds with status 200', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser)
+          .expect(200);
+      });
+      it('responds with isLoggedIn === true', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser)
+          .then(data => {
+            expect(data.body.isLoggedIn).toEqual(true);
+          });
+      });
+      it('responds with username === newUser', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.body.username).toEqual(newUser.username);
+          });
+      });
+      it('responds with instructions for the browser to store an ssid cookie', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.header["set-cookie"][0].includes("ssid=")).toEqual(true);
+          });
+      });
+    });
+
+    describe('POST - FAILURE: (username that does exist in the "users" table of the test database)', () => {
+      const newUser = { username: 'newUser', password: 'password' }
+      it('responds with status of 500 ', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser)
+          .expect(500);
+      });
+      it('responds with isLoggedIn === false', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.body.isLoggedIn).toEqual(false);
+          });
+      });
+      it('responds with with an empty string "" as the username', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.body.username).toEqual("");
+          });
+      });
+      it('responds with with an error message of "ERROR: Unable to create user"', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.body.errorMsg).toEqual("ERROR: Unable to create user");
+          });
+      });
+      it('responds without instructions for the browser to store an ssid cookie', () => {
+        return request(server)
+          .post('/api/signup')
+          .send(newUser).then((data) => {
+            expect(data.header["set-cookie"]).toEqual(undefined);
+          });
+      });
+    });
+  });
+
+  describe('/api/login', () => {
+    describe('POST - SUCCESS (login attemp with valid stored credentials in DB)', () => {
+      const newUser = { username: 'newUser', password: 'password' };
+      it('responds with status 200', () => {
+        return request(server)
+          .post('/api/login')
+          .send(newUser)
+          .expect(200);
+      });
+      it('responds with isLoggedIn === true', () => {
+        return request(server)
+          .post('/api/login')
+          .send(newUser)
+          .then(data => {
+            expect(data.body.isLoggedIn).toEqual(true);
+          });
+      });
+      it('responds with username === newUser', () => {
+        return request(server)
+          .post('/api/login')
+          .send(newUser).then((data) => {
+            expect(data.body.username).toEqual(newUser.username);
+          });
+      });
+      it('responds with instructions for the browser to store an ssid cookie', () => {
+        return request(server)
+          .post('/api/login')
+          .send(newUser).then((data) => {
+            expect(data.header["set-cookie"][0].includes("ssid=")).toEqual(true);
+          });
       });
     });
   });
 
 });
-
     //describe('/api/isloggedin', () => {
     //  describe('GET - Client request does not have an SSID cookie', () => {
     //    return request(server)

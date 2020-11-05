@@ -8,10 +8,10 @@
   ],
   "scripts": {
     "start": "nodemon server/server.js",
+    "testserver": "cross-env NODE_ENV=test nodemon server/server.js",
     "build": "cross-env NODE_ENV=production webpack -w",
     "dev": "concurrently \"cross-env NODE_ENV=development webpack-dev-server --open\" \"nodemon server/server.js\"",
-    "test": "cross-env NODE_ENV=test jest",
-    "test:watch": "jest --watch"
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",

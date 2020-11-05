@@ -24,8 +24,6 @@ userController.hashPassword = (req, res, next) => {
 userController.createUser = (req, res, next) => {
   const { hash } = res.locals;
   const { username } = req.body;
-  console.log(username);
-  console.log(hash);
   // Attempt to create the new user in the database
   db.query('INSERT INTO users(user_name, hashed_pass) VALUES ($1, $2) RETURNING id;', [username, hash])
     .then((data) => {
@@ -49,7 +47,8 @@ userController.verifyUser = (req, res, next) => {
   // Find the stored encrypted password for the user
   db.query('SELECT hashed_pass FROM users WHERE user_name = $1', [USERNAME])
     .then((data) => {
-      const HASHED_PASSWORD = data.rows[0];
+      const HASHED_PASSWORD = data.rows[0].hashed_pass;
+      console.log("PASSWORD: ", HASHED_PASSWORD);
       // Compare the stored password with the provided password
       bcrypt.compare(PASSWORD, HASHED_PASSWORD).then((result) => {
         if (!result) {
