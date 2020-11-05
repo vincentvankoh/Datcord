@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 function Main () {
   // [state name, state action]
@@ -14,9 +14,25 @@ function Main () {
   const nestedDisplay = [];
 
   useEffect( () => {
+    document.getElementById('sendChat').addEventListener('keypress', function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+    });
+  });
+
+  const messagesEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(scrollToBottom, [messages]);
+
+  useEffect( () => {
     connection.onopen = (e) => {
         console.log('WebSocket is open now.');
-      }
+    }
     connection.onclose = (e) => {
     console.log('WebSocket is closed now.');
     setWebSocket(new WebSocket(url));
@@ -42,11 +58,16 @@ function Main () {
   
     return (
         <div>
-             <div className='chatroom'>
+             <div className='chatroom' >
                 { messages }
+                <div ref={messagesEndRef} />
             </div>
         <hr />
-            <form>
+            <form onSubmit={e => { e.preventDefault();
+                        connection.send(message);
+                        const textbox = document.querySelector('.message');
+                        textbox.value = '';
+                        setMessages(nestedDisplay); }}>
                 <input 
                     type='text'
                     className='message'
@@ -54,6 +75,7 @@ function Main () {
                     onChange={ (e) => setMessage(e.target.value)}
                     />
                 <button
+                    id='sendChat'
                     type='button'
                     onClick={ (e) => {
                         e.preventDefault();
