@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link, useHistory, BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import Main from './Main.jsx';
-import Signup from './Signup.jsx';
+import Signup from './SignUp.jsx';
 
 function Login() {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("this shit is broken");
+  const [errorMessage, setErrorMessage] = useState("Login unsuccessful");
   const [loginStatus, setLoginStatus] = useState("");
 
   function handleClick() {
