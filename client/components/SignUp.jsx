@@ -79,7 +79,8 @@ function Signup () {
         
         }
       </Route>
-      <Route exact path='/' component={Main}>
+      <Route exact path='/'>
+        <Main username={username}/>
       </Route>
     </Switch>
     </Router>
