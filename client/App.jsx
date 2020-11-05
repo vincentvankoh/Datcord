@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 
 import Login from './components/Login.jsx';
-import SignUp from './components/SignUp.jsx';
+import Signup from './components/Signup.jsx';
 import Main from './components/Main.jsx';
 
 function App(props) {
@@ -37,7 +37,7 @@ function App(props) {
           {isLoggedIn ? <Main /> : <Redirect to="/login" />}
         </Route>
         <Route exact path="/login" component={Login}></Route>
-        <Route exact path="/signup" component={SignUp}>
+        <Route exact path="/signup" component={Signup}>
         </Route>
       </Switch>
     </Router>
