@@ -19,7 +19,6 @@ function Main () {
       }
     connection.onclose = (e) => {
     console.log('WebSocket is closed now.');
-    // You can pass the special value of empty array [] as a way of saying “only run on mount, and clean up on unmount”
     setWebSocket(new WebSocket(url));
     }
     connection.onerror = (e) => {
@@ -28,15 +27,15 @@ function Main () {
     connection.onmessage = (e) => {
     // when message is received from server append to dom
         nestedDisplay.push(
-            <div key={e.data}>
-                <p key={e.data}>{e.data}</p>
+            <div key={Date.now()}>
+                <p >{e.data}</p>
                 <hr />
             </div>
         )
         // console.log("nested display updated", nestedDisplay)
         setMessages(messages.concat(nestedDisplay));
     }
-  });
+  }, []);
 
     // console.log(messages);
     // console.log(message);

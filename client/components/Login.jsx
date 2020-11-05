@@ -6,7 +6,7 @@ import Signup from './SignUp.jsx';
 function Login() {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("this shit is broken");
+  const [errorMessage, setErrorMessage] = useState("Login unsuccessful");
   const [loginStatus, setLoginStatus] = useState("");
 
   function handleClick() {
@@ -48,8 +48,6 @@ function Login() {
             {loginStatus ? <Redirect to="/" /> :
               <div>
                 <h3>Login</h3>
-                {console.log(loginStatus)}
-                <p>{loginStatus}</p>
                 <form style={{ display: 'flex', flexDirection: 'column' }}>
                   <input
                     type="text"
