@@ -1,16 +1,14 @@
 const { Pool } = require('pg');
+require('dotenv').config();
 
 let PG_URI = '';
 
 if (process.env.NODE_ENV === 'test') {
-  console.log("TEST MODE");
-  // Use a test database when running npm test
-  PG_URI = 'postgres://mltnekax:BZRMKAEF6HksAkNacSm5u7N2w-DWiH6u@lallah.db.elephantsql.com:5432/mltnekax';
+  PG_URI = process.env.PG_URI_TEST;
 } else {
-  console.log("DEV MODE");
+  console.log('DEV MODE');
   // Use the development database when not running in test mode
-  PG_URI =
-    'postgres://nlnabeqa:pH3fPZ-Q_kaOm5h59XAjUBfkSPa6IkiP@lallah.db.elephantsql.com:5432/nlnabeqa';
+  PG_URI = process.env.PG_URI_DEV;
 }
 
 // create a new pool here using the connection string above
@@ -23,4 +21,4 @@ module.exports = {
     console.log('Query: ', text);
     return pool.query(text, params, callback);
   },
-}
+};
