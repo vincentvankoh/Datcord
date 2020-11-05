@@ -44,28 +44,26 @@ userController.createUser = (req, res, next) => {
 userController.verifyUser = (req, res, next) => {
   const USERNAME = req.body.username;
   const PASSWORD = req.body.password;
-  console.log('USER: ', req.body);
   // Find the stored encrypted password for the user
   db.query('SELECT hashed_pass, id FROM users WHERE user_name = $1', [USERNAME])
     .then((data) => {
       const HASHED_PASSWORD = data.rows[0].hashed_pass;
       const USER_ID = data.rows[0].id;
-      console.log('PASSWORD: ', HASHED_PASSWORD);
       // Compare the stored password with the provided password
       bcrypt.compare(PASSWORD, HASHED_PASSWORD).then((result) => {
         if (!result) {
-          // If the password was incorrect, pass on to the global error handler
-          const errorMsg = 'ERROR: Password is incorrect';
+          // If the password was incorrect, pass on Pto the global error handler
+          const errorMsg = 'ERROR: password is incorrect';
           return next(errorMsg);
         }
+        res.locals.username = USERNAME;
+        res.locals.userID = USER_ID;
+        res.locals.isLoggedIn = true;
+        return next();
       }).catch((err) => {
         const errorMsg = 'ERROR: Failure comparing hashed password';
         return next(errorMsg);
       });
-      res.locals.username = USERNAME;
-      res.locals.userID = USER_ID;
-      res.locals.isLoggedIn = true;
-      return next();
     })
     .catch((err) => {
       // If the username was incorrect, pass on to the global error handler

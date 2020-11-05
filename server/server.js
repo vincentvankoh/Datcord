@@ -42,6 +42,24 @@ app.post('/api/login', userController.verifyUser, sessionController.createSessio
   res.status(200).send({ isLoggedIn, username });
 });
 
+// POST - /api/logout: request contains ssid cookie
+app.post('/api/logout', sessionController.deleteSession, (req, res) => {
+  const { isLoggedIn } = res.locals;
+  res.clearCookie('ssid').status(200).send({ isLoggedIn });
+});
+
+// POST - /api/updateusername: request contains username, password, newUsername,
+app.post('/api/updateusername', (req, res) => {
+  const { username } = res.locals;
+  res.status(200).send({ username });
+});
+
+// POST - /api/updatepassword: request contains username, password, newPassword,
+app.post('/api/updatepassword', (req, res) => {
+  const { username } = res.locals;
+  res.status(200).send({ username });
+});
+
 // 404 handler for unknown routes
 app.use('*', (req, res) => {
   // Re-route to index.html to avoid resetting the React app
@@ -54,6 +72,7 @@ app.use((err, req, res, next) => {
   const username = '';
   const errorMsg = err;
   console.log(errorMsg);
+  console.log('MADE IT TO CORRECT PATH');
   res.status(500).send({ isLoggedIn, username, errorMsg });
 });
 

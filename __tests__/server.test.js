@@ -5,6 +5,8 @@ const path = require('path');
 const server = 'http://localhost:3000';
 const cookieParser = require('cookie-parser');
 const db = require('../server/models/models.js');
+
+let sessionID = '';
 /*
 This is testing end to end connection from the client to the server and back to the Database
 */
@@ -79,22 +81,26 @@ describe('Server Route Integration', () => {
         .expect(500));
       it('responds with isLoggedIn === false', () => request(server)
         .post('/api/signup')
-        .send(newUser).then((data) => {
+        .send(newUser)
+        .then((data) => {
           expect(data.body.isLoggedIn).toEqual(false);
         }));
       it('responds with with an empty string "" as the username', () => request(server)
         .post('/api/signup')
-        .send(newUser).then((data) => {
+        .send(newUser)
+        .then((data) => {
           expect(data.body.username).toEqual('');
         }));
       it('responds with with an error message of "ERROR: Unable to create user"', () => request(server)
         .post('/api/signup')
-        .send(newUser).then((data) => {
+        .send(newUser)
+        .then((data) => {
           expect(data.body.errorMsg).toEqual('ERROR: Unable to create user');
         }));
       it('responds without instructions for the browser to store an ssid cookie', () => request(server)
         .post('/api/signup')
-        .send(newUser).then((data) => {
+        .send(newUser)
+        .then((data) => {
           expect(data.header['set-cookie']).toEqual(undefined);
         }));
     });
@@ -104,7 +110,7 @@ describe('Server Route Integration', () => {
   and database during a succesful login
   */
   describe('/api/login', () => {
-    describe('POST - SUCCESS (login attemp with valid stored credentials in DB)', () => {
+    describe('POST - SUCCESS (login attempt with valid stored credentials in DB)', () => {
       // declare a dummy user that is signing up in order to test all the functionality
       const newUser = { username: 'newUser', password: 'password' };
       it('responds with status 200', () => request(server)
@@ -119,47 +125,181 @@ describe('Server Route Integration', () => {
         }));
       it('responds with username === newUser', () => request(server)
         .post('/api/login')
-        .send(newUser).then((data) => {
+        .send(newUser)
+        .then((data) => {
           expect(data.body.username).toEqual(newUser.username);
         }));
       it('responds with instructions for the browser to store an ssid cookie', () => request(server)
         .post('/api/login')
-        .send(newUser).then((data) => {
-          expect(data.header['set-cookie'][0].includes('ssid=')).toEqual(true);
+        .send(newUser)
+        .then((data) => {
+          sessionID = data.header['set-cookie'][0];
+          expect(sessionID.includes('ssid=')).toEqual(true);
         }));
+    });
+    describe('POST - FAILURE (login attempt with unknown username)', () => {
+      // declare a dummy user that is signing up in order to test all the functionality
+      const newUser = { username: 'oldUser', password: 'password' };
+      it('responds with status of 500 ', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .expect(500));
+      it('responds with isLoggedIn === false', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(false);
+        }));
+      it('responds with with an empty string "" as the username', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.username).toEqual('');
+        }));
+      it('responds with with an error message of "ERROR: User doesn\'t exist in the database"', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.errorMsg).toEqual('ERROR: User doesn\'t exist in the database');
+        }));
+      it('responds without instructions for the browser to store an ssid cookie', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.header['set-cookie']).toEqual(undefined);
+        }));
+    });
+    describe('POST - FAILURE (login attempt with password that does not match value stored in DB)', () => {
+      // declare a dummy user that is signing up in order to test all the functionality
+      const newUser = { username: 'newUser', password: 'wrongPassword' };
+      it('responds with status of 500 ', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .expect(500));
+      it('responds with isLoggedIn === false', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(false);
+        }));
+      it('responds with with an empty string "" as the username', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.username).toEqual('');
+        }));
+      it('responds with with an error message of "ERROR: password is incorrect"', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.body.errorMsg).toEqual('ERROR: password is incorrect');
+        }));
+      it('responds without instructions for the browser to store an ssid cookie', () => request(server)
+        .post('/api/login')
+        .send(newUser)
+        .then((data) => {
+          expect(data.header['set-cookie']).toEqual(undefined);
+        }));
+    });
+  });
+  /*
+   Testing session and cookie verification
+   */
+  describe('/api/isloggedin', () => {
+    describe('GET - SUCCESS (Client request does not have an SSID cookie)', () => {
+      it('responds with status of 200 ', () => request(server)
+        .get('/api/isloggedin')
+        .expect(200));
+      it('responds with isLoggedIn === false', () => request(server)
+        .get('/api/isloggedin')
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(false);
+        }));
+      it('responds with with an empty string "" as the username', () => request(server)
+        .get('/api/isloggedin')
+        .then((data) => {
+          expect(data.body.username).toEqual('');
+        }));
+    });
+    describe('GET - SUCCESS (Client request has a valid SSID cookie)', () => {
+      it('responds with status of 200', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .expect(200));
+      it('responds with isLoggedIn === true', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(true);
+        }));
+      it('responds with with an empty string "newUser" as the username', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.body.username).toEqual('newUser');
+        }));
+    });
+    describe('GET - FAILURE (Client request has a invalid SSID cookie)', () => {
+      beforeAll((done) => {
+        db.query('TRUNCATE users CASCADE')
+          .then(() => {
+            done();
+          });
+      });
+      it('responds with status of 500', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .expect(500));
+      it('responds with isLoggedIn === false', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(false);
+        }));
+      it('responds with with an error message of "ERROR: Session ID not found in session database"', () => request(server)
+        .get('/api/isloggedin')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.body.errorMsg).toEqual('ERROR: Session ID not found in session database');
+        }));
+    });
+  });
+  /*
+ Testing logout functionality
+ */
+  describe('/api/logout', () => {
+    const newUser = { username: 'newUser', password: 'password' };
+    beforeAll((done) => {
+      request(server).post('/api/signup').send(newUser).then((data) => {
+        sessionID = data.header['set-cookie'][0];
+        done();
+      });
+    });
+    afterEach((done) => {
+      request(server)
+        .post('/api/login')
+        .send(newUser).then((data) => {
+          sessionID = data.header['set-cookie'][0];
+          done();
+        });
+    });
+    // testing post request to logout
+    describe('Post - SUCCESS (with valid ssid cookie)', () => {
+      it('responds with status 200', () => request(server)
+        .post('/api/logout')
+        .set('cookie', sessionID)
+        .expect(200));
+      it('responds with boolean of false for isLoggedIn ', () => request(server)
+        .post('/api/logout')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.body.isLoggedIn).toEqual(false);
+        }));
+      // Should have clearCookie(ssid) in data.headers
     });
   });
 });
 
-// describe('/api/isloggedin', () => {
-//  describe('GET - Client request does not have an SSID cookie', () => {
-//    return request(server)
-//      .get('/api/isloggedin')
-//  });
-//  describe('GET - Client request has a valid SSID cookie', () => {
-//    // Define cookie here
-//    return request(server)
-//      .get('/api/isloggedin')
-//      .set('cookie', cookie)
-//  });
-//  describe('GET - Client request has an invalid SSID cookie', () => {
-//    // Define cookie here
-//    return request(server)
-//      .get('/api/isloggedin')
-//      .set('cookie', cookie)
-//  });
-// });
-
-// SUCCESS:
-// 200 status
-// Body contains { isLoggedIn of true, username of provided username
-
-// FAILURE:
-// 500 status
-// Body contains { isLoggedIn of false, username '', errmsg = ''}
-
-// FAILURE TEST CASES:
-// ------------------
-// userController.hashPassword: 'ERROR: Failed to encrypt user password'
-// userController.createUser: 'ERROR: Unable to create user'
-// sessionController.createSession: 'ERROR: Failed to store new session in database'
+// POST - /api/logout: request contains ssid cookie, response returns isLoggedIn of false and status of 200
+// POST - /api/updateusername: request contains username, password, newUsername, response returns username and status of 200
+// POST - /api/updatepassword: request contains username, password, newPassword, response returns username and status of 200
