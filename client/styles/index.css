@@ -13,6 +13,8 @@ body, .root {
   min-width: 15em;
   height: 30em;
   overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 form {

@@ -1,10 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 
-function Main () {
+function Main (props) {
   // [state name, state action]
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState([]);
   const [messages, setMessages] = useState([]);
   const [ws, setWebSocket] = useState("");
+
+  // this gives Main.jsx access to the username property from App.jsx
+    // see React hooks useContext 
+//   const username = useContext(UserContext);
 
   // set websocket location
   const url = 'ws://localhost:4040';
@@ -21,14 +25,6 @@ function Main () {
     });
   });
 
-  const messagesEndRef = useRef(null)
-
-  const scrollToBottom = () => {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(scrollToBottom, [messages]);
-
   useEffect( () => {
     connection.onopen = (e) => {
         console.log('WebSocket is open now.');
@@ -42,9 +38,12 @@ function Main () {
     }
     connection.onmessage = (e) => {
     // when message is received from server append to dom
-        nestedDisplay.push(
+          console.log('username', e.data[0], 'message', e.data[1], 'e', e, 'data', e.data)
+          let messageArray = e.data.split(/,(.+)/)
+        nestedDisplay.unshift(
             <div key={Date.now()}>
-                <p >{e.data}</p>
+                <p><span>{messageArray[0]}: </span>
+                {messageArray[1]}</p>
                 <hr />
             </div>
         )
@@ -60,7 +59,6 @@ function Main () {
         <div>
              <div className='chatroom' >
                 { messages }
-                <div ref={messagesEndRef} />
             </div>
         <hr />
             <form onSubmit={e => { e.preventDefault();
@@ -72,7 +70,9 @@ function Main () {
                     type='text'
                     className='message'
                     placeholder='message'
-                    onChange={ (e) => setMessage(e.target.value)}
+                    onChange={ (e) => setMessage(
+                          [props.username, e.target.value]
+                        )}
                     />
                 <button
                     id='sendChat'
