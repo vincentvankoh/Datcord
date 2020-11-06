@@ -20,6 +20,22 @@ userController.hashPassword = (req, res, next) => {
   });
 };
 
+// Use bcrypt to generate an ecrypted version of the user password
+userController.hashNewPassword = (req, res, next) => {
+  const { newPassword } = req.body;
+  // Attempt to generate the encrypted password
+  bcrypt.hash(newPassword, saltRounds, (err, hash) => {
+    if (err) {
+      // If an error occurs, call the global error handler
+      const errorMsg = 'ERROR: Failed to encrypt user password';
+      return next(errorMsg);
+    }
+    // If successful, pass the encrypted password on to the next middleware function
+    res.locals.hash = hash;
+    return next();
+  });
+};
+
 // Create a new user in the database with the username and encrypted password
 userController.createUser = (req, res, next) => {
   const { hash } = res.locals;
@@ -67,6 +83,78 @@ userController.verifyUser = (req, res, next) => {
     })
     .catch((err) => {
       // If the username was incorrect, pass on to the global error handler
+      const errorMsg = 'ERROR: User doesn\'t exist in the database';
+      return next(errorMsg);
+    });
+};
+
+userController.updateUser = (req, res, next) => {
+  const USERNAME = req.body.username;
+  const NEW_USERNAME = req.body.newUsername;
+  const PASSWORD = req.body.password;
+  // Find the stored encrypted password for the user
+  db.query('SELECT hashed_pass, id FROM users WHERE user_name = $1', [USERNAME])
+    .then((data) => {
+      const HASHED_PASSWORD = data.rows[0].hashed_pass;
+      // Compare the stored password with the provided password
+      bcrypt.compare(PASSWORD, HASHED_PASSWORD).then((result) => {
+        if (!result) {
+        // If the password was incorrect, pass on Pto the global error handler
+          const errorMsg = 'ERROR: password is incorrect';
+          return next(errorMsg);
+        }
+        db.query('UPDATE users SET user_name = $1 WHERE user_name = $2;', [NEW_USERNAME, USERNAME])
+          .then(() => {
+            res.locals.username = NEW_USERNAME;
+            return next();
+          })
+          .catch((err) => {
+            const errorMsg = 'ERROR: Failure updating username in database';
+            return next(errorMsg);
+          });
+      }).catch((err) => {
+        const errorMsg = 'ERROR: Failure comparing hashed password';
+        return next(errorMsg);
+      });
+    })
+    .catch((err) => {
+    // If the username was incorrect, pass on to the global error handler
+      const errorMsg = 'ERROR: User doesn\'t exist in the database';
+      return next(errorMsg);
+    });
+};
+
+userController.updatePassword = (req, res, next) => {
+  const USERNAME = req.body.username;
+  const NEW_PASSWORD = res.locals.hash;
+  const PASSWORD = req.body.password;
+  // Find the stored encrypted password for the user
+  db.query('SELECT hashed_pass, id FROM users WHERE user_name = $1', [USERNAME])
+    .then((data) => {
+      const HASHED_PASSWORD = data.rows[0].hashed_pass;
+      // Compare the stored password with the provided password
+      bcrypt.compare(PASSWORD, HASHED_PASSWORD).then((result) => {
+        if (!result) {
+        // If the password was incorrect, pass on Pto the global error handler
+          const errorMsg = 'ERROR: password is incorrect';
+          return next(errorMsg);
+        }
+        db.query('UPDATE users SET hashed_pass = $1 WHERE user_name = $2;', [NEW_PASSWORD, USERNAME])
+          .then(() => {
+            res.locals.username = USERNAME;
+            return next();
+          })
+          .catch((err) => {
+            const errorMsg = 'ERROR: Failure updating password in database';
+            return next(errorMsg);
+          });
+      }).catch((err) => {
+        const errorMsg = 'ERROR: Failure comparing hashed password';
+        return next(errorMsg);
+      });
+    })
+    .catch((err) => {
+    // If the username was incorrect, pass on to the global error handler
       const errorMsg = 'ERROR: User doesn\'t exist in the database';
       return next(errorMsg);
     });

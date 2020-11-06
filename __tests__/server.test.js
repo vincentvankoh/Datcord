@@ -295,11 +295,61 @@ describe('Server Route Integration', () => {
         .then((data) => {
           expect(data.body.isLoggedIn).toEqual(false);
         }));
-      // Should have clearCookie(ssid) in data.headers
+      it('responds with "set-cookie["ssid=;"]"', () => request(server)
+        .post('/api/logout')
+        .set('cookie', sessionID)
+        .then((data) => {
+          expect(data.header['set-cookie'][0].includes('ssid=;')).toEqual(true);
+        }));
+      describe('Post - FAILURE (with invalid ssid cookie)', () => {
+        it('responds with status 500', () => request(server)
+          .post('/api/logout')
+          .expect(500));
+        it('responds with boolean of false for isLoggedIn ', () => request(server)
+          .post('/api/logout')
+          .then((data) => {
+            expect(data.body.isLoggedIn).toEqual(false);
+          }));
+        it('responds with with an error message of "ERROR: Session ID not found in session database"', () => request(server)
+          .post('/api/logout')
+          .then((data) => {
+            expect(data.body.errorMsg).toEqual('ERROR: Session ID not found in session database');
+          }));
+      });
+    });
+  });
+  // POST - /api/updateusername: request contains username, password, newUsername, response returns username and status of 200
+  describe('/api/updateusername', () => {
+    const newUserData1 = { username: 'newUser', password: 'password', newUsername: 'newUser2' };
+    const newUserData2 = { username: 'newUser2', password: 'password', newUsername: 'newUser' };
+    describe('POST - SUCCESS (username and password are in users database and new username is not)', () => {
+      it('responds with status of 200 ', () => request(server)
+        .post('/api/updateusername')
+        .send(newUserData1)
+        .expect(200));
+      it('responds with with new username as the username', () => request(server)
+        .post('/api/updateusername')
+        .send(newUserData2)
+        .then((data) => {
+          expect(data.body.username).toEqual('newUser');
+        }));
+    });
+  });
+  /// / POST - /api/updatepassword: request contains username, password, newPassword, response returns username and status of 200
+  describe('/api/updatepassword', () => {
+    const newUserData1 = { username: 'newUser', password: 'password', newPassword: 'newPassword' };
+    const newUserData2 = { username: 'newUser', password: 'newPassword', newPassword: 'password' };
+    describe('POST - SUCCESS (username and password are in users database and new password is not)', () => {
+      it('responds with status of 200 ', () => request(server)
+        .post('/api/updatepassword')
+        .send(newUserData1)
+        .expect(200));
+      it('responds with with provided username as the username', () => request(server)
+        .post('/api/updatepassword')
+        .send(newUserData2)
+        .then((data) => {
+          expect(data.body.username).toEqual('newUser');
+        }));
     });
   });
 });
-
-// POST - /api/logout: request contains ssid cookie, response returns isLoggedIn of false and status of 200
-// POST - /api/updateusername: request contains username, password, newUsername, response returns username and status of 200
-// POST - /api/updatepassword: request contains username, password, newPassword, response returns username and status of 200
