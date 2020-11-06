@@ -42,6 +42,11 @@ sessionController.createSession = (req, res, next) => {
 // Delete the SSID from the sessions database if it exists
 sessionController.deleteSession = (req, res, next) => {
   const SSID_COOKIE = req.cookies.ssid;
+  if (!SSID_COOKIE) {
+    // Pass any errors along to the global error handler
+    const errorMsg = 'ERROR: Session ID not found in session database';
+    return next(errorMsg);
+  }
   db.query('DELETE FROM sessions WHERE ssid = $1', [SSID_COOKIE])
     .then(() => {
       res.locals.isLoggedIn = false;
@@ -49,7 +54,7 @@ sessionController.deleteSession = (req, res, next) => {
     })
     .catch((err) => {
       // Pass any errors along to the global error handler
-      const errorMsg = 'ERROR: Session does not exist in database';
+      const errorMsg = 'ERROR: Session ID not found in session database';
       return next(errorMsg);
     });
 };

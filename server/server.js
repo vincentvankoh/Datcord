@@ -49,14 +49,15 @@ app.post('/api/logout', sessionController.deleteSession, (req, res) => {
 });
 
 // POST - /api/updateusername: request contains username, password, newUsername,
-app.post('/api/updateusername', (req, res) => {
+app.post('/api/updateusername', userController.updateUser, (req, res) => {
   const { username } = res.locals;
   res.status(200).send({ username });
 });
 
 // POST - /api/updatepassword: request contains username, password, newPassword,
-app.post('/api/updatepassword', (req, res) => {
+app.post('/api/updatepassword', userController.hashNewPassword, userController.updatePassword, (req, res) => {
   const { username } = res.locals;
+  console.log(username);
   res.status(200).send({ username });
 });
 
