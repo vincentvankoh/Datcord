@@ -7,7 +7,7 @@ function Login(props) {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("Login unsuccessful");
-  const [loginStatus, setLoginStatus] = useState("");
+  const [loginStatus, setLoginStatus] = useState();
 
   function handleClick() {
     // fetch starts
