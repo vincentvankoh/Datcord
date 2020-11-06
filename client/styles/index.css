@@ -13,9 +13,57 @@ body, .root {
   min-width: 15em;
   height: 30em;
   overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.logout {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.buttons {  
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1rem;
 }
 
 form {
   display: flex;
   justify-content: center;
+  padding-bottom: 1rem;
+}
+
+input {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #DEDEDE;
+  border-radius: 25px;
+  width: 45%;
+  overflow: hidden;
+  align-items: center;
+}
+
+.submit{
+  /* display: flex;
+  padding: 0.6rem 1rem;
+  border: none;
+  color: #747474;
+  margin: 0.3rem;
+  border-radius: 4px;
+  font-size: 14px; */
+  margin-top: 20px;
+  width: 200px
+}
+
+.navbutton{
+  display: flex;
+  padding: 0.6rem 1rem;
+  border: none;
+  color: #747474;
+  margin: 0.3rem;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px
 }

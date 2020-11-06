@@ -3,11 +3,11 @@ import { Link, useHistory, BrowserRouter as Router, Route, Switch, Redirect } fr
 import Main from './Main.jsx';
 import Signup from './SignUp.jsx';
 
-function Login() {
+function Login(props) {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("Login unsuccessful");
-  const [loginStatus, setLoginStatus] = useState("");
+  const [loginStatus, setLoginStatus] = useState();
 
   function handleClick() {
     // fetch starts
@@ -70,7 +70,9 @@ function Login() {
               </div>
             }
           </Route>
-          <Route exact path='/' component={Main} />
+          <Route exact path='/'>
+            <Main username={username} />
+          </Route>
           <Route exact path='/signup' component={Signup} />
         </Switch>
       </Router>
