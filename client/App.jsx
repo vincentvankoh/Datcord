@@ -19,7 +19,7 @@ function App(props) {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    // as soon as the page loads, send fetch request to see if the isSignedIn is true
+    // as soon as the page loads, send fetch request to see if the isLoggedIn is true
     fetch('/api/isloggedin', {
       method: 'GET',
       headers: {
