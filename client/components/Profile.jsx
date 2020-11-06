@@ -13,6 +13,7 @@ function Profile(props) {
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [success, setSuccess] = useState(<></>);
+  const [renderedComponent, setNewComponent] = useState();
   // make post request to /api/updateusername /api/updatepassword
     // update user
       // send username, password, newUsername
@@ -137,6 +138,24 @@ function Profile(props) {
         }).catch((err) => console.log(err));
     }
 
+    function logoutClick() {
+      console.log("logout clicked")
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+        }).then((resp) => resp.json())
+        .then((data) => {
+          const { isLoggedIn } = data;
+          // if isLogged in is true, redirect to main page
+          if (isLoggedIn) {
+          } else {
+            setNewComponent(<Redirect to="/" />);
+          }
+        }).catch((err) => console.log(err));
+  }
+
     return (
       <div>
         <Router>
@@ -144,10 +163,8 @@ function Profile(props) {
             <Route exact path="/">
               <App />
             </Route>
-            <Route exact path="/logout">
-              <Logout />
-          </Route> 
           <Route exact path="/profile">
+            {renderedComponent}
             {chatComponent}
             <div>
               <h2>{props.username}'s Profile</h2>
