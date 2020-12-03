@@ -8,15 +8,10 @@ import Login from "./Login.jsx";
 import App from "../App.jsx";
 
 function Main (props) {
-  // [state name, state action]
   const [message, setMessage] = useState([]);
   const [messages, setMessages] = useState([]);
   const [ws, setWebSocket] = useState("");
   const [renderedComponent, setNewComponent] = useState();
-
-  // this gives Main.jsx access to the username property from App.jsx
-    // see React hooks useContext 
-//   const username = useContext(UserContext);
 
   // set websocket location
   const url = 'ws://localhost:4040';
